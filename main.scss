@@ -1,0 +1,39 @@
+body {
+    background-color: black;
+}
+#board-one {
+    border: 1px solid skyblue;
+    margin: 0 auto;
+    display: block;
+    justify-content: center;
+    align-items: center;
+}
+
+#menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 10;
+  }
+  
+  .menu h1 {
+    text-align: center;
+    margin-top: 0;
+  }
+  
+  .menu button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .menu button:hover {
+    background-color: #ccc;
+  }
+ 
