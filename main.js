@@ -1,322 +1,341 @@
-let boardwidth = 500;
-let boardheight = 500;
-let level;
-let context;
+//board
+let board;
+let boardWidth = 500;
+let boardHeight = 500;
+let context; 
 
-let gameStatus = "menu";// cập nhập trạng thái game
-//player
-let playerWidth =80;
-let playrerHeight =10;
-let playerVelocityX = 10;// van toc di chuyen thanh ngang
+let currentLevel = 1; // Mức độ hiện tại, mặc định là 1
 
+//players
+let playerWidth = 500; //500 for testing, 80 normal
+let playerHeight = 10;
+let playerVelocityX = 10; //move 10 pixels each time
 
 let player = {
-    //toa do x
-    x : boardwidth/2 - playerWidth/2,
-    //toa do y
-    y :boardheight - playrerHeight -5,
-    // cau hinh chieu dai va rong
-    width : playerWidth,
-    height : playrerHeight,
-    //van toc di chuyen
+    x : boardWidth/2 - playerWidth/2,
+    y : boardHeight - playerHeight - 5,
+    width: playerWidth,
+    height: playerHeight,
     velocityX : playerVelocityX
 }
-// bóng 
-let ballwidth =10;
-let ballheight =10;
-// chinh huong qua bong roi xuong duoi
-let ballVelocityX =2; 
-let ballVelocityY=3;
 
+//ball
+let ballWidth = 10;
+let ballHeight = 10;
+let ballVelocityX = 15; //15 for testing, 3 normal
+let ballVelocityY = 10; //10 for testing, 2 normal
 
-//khối
-let blockArray = [];
-let blockWidth = 50;
-let blockHeigt = 10;
-let blockColumns = 8;
-let blockRows = 3; // tăng thêm khi qua level mới
-let blockMaxRows =10; // giới hạn số dòng (tránh trường hợp hiều quá)
-let blockCount =0; // biến đếm số lượng phá huỷ khối
-
-
-//
-let blockX = 15;
-let blockY =45;
-
-let score =0;
-let gameOver = false;
-
-
-
-let ball ={
-    x : boardwidth/2,
-    y: boardheight/2,
-    width : ballwidth,
-    height: ballheight,
+let ball = {
+    x : boardWidth/2,
+    y : boardHeight/2,
+    width: ballWidth,
+    height: ballHeight,
     velocityX : ballVelocityX,
     velocityY : ballVelocityY
 }
 
+//blocks
+let blockArray = [];
+let blockWidth = 50;
+let blockHeight = 10;
+let blockColumns = 8; 
+let blockRows = 3; //add more as game goes on
+let blockMaxRows = 10; //limit how many rows
+let blockCount = 0;
 
-window.onload = function(){
-    const menu = document.getElementById("menu");
-    const startGame = document.getElementById("startGame");
-    const returnGame = document.getElementById("returnGame");
-    const canvas = document.getElementById("board-one");
+//starting block corners top left 
+let blockX = 15;
+let blockY = 45;
 
-    startGame.addEventListener("click", function(){
-        canvas.style.display = "block";
-        startGame.style.display = "none";
-        returnGame.style.display = "block";
-        menu.style.display = "none";
-        gameStatus = "playing";
-        update();
+let score = 0;
+let gameOver = false;
+
+// vật phẩm
+let powerUpWidth = 20;
+let powerUpHeight = 20;
+let powerUpVelocityY = 1; // Tốc độ rơi của vật phẩm
+
+let powerUps = []; // Mảng chứa các vật phẩm
+
+// Hàm tạo mới vật phẩm
+function createPowerUp(x, y) {
+    if(currentLevel === 2) {
+    let powerUp = {
+        x: x,
+        y: y,
+        width: powerUpWidth,
+        height: powerUpHeight,
+        velocityY: powerUpVelocityY,
+        type: "speedUp"
+    };
+
+    let doubleBall = {
+        x: x,
+        y: y,
+        width: powerUpWidth,
+        height: powerUpHeight,
+        velocityY: powerUpVelocityY,
+        type: "doubleBall"
+    };
+
+        powerUps.push(powerUp);
+    }
+}
+// Hàm cập nhật vật phẩm
+function updatePowerUps() {
+    for (let i = 0; i < powerUps.length; i++) {
+        let powerUp = powerUps[i];
+        powerUp.y += powerUp.velocityY;
         
-    });
+        // Kiểm tra va chạm với người chơi
+        if (currentLevel === 2 && detectCollision(player, powerUp)) {
+            if (powerUp.type === "splitBall") {
+                splitBall(); // Thực hiện tách ra thành 2 quả bóng
+            }
+            // Thực hiện tăng số lượng quả bóng và tăng tốc độ
+            ball.velocityX = Math.abs(ball.velocityX) * 2; // Tăng tốc độ theo hướng hiện tại của quả bóng
+            ball.velocityY = Math.abs(ball.velocityY) * 2; // Tăng tốc độ theo hướng hiện tại của quả bóng
+            powerUps.splice(i, 1); // Xóa vật phẩm khỏi mảng
+        } else {
+            // Vẽ vật phẩm
+            context.fillStyle = "yellow";
+            context.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+        }
+    }
+}
+// tách ra thành 2 quả bóng
+function splitBall() {
+    let newBalls = [
+        { x: ball.x, y: ball.y, width: ball.width, height: ball.height, velocityX: -ball.velocityX, velocityY: -ball.velocityY },
+        { x: ball.x, y: ball.y, width: ball.width, height: ball.height, velocityX: ball.velocityX, velocityY: -ball.velocityY }
+    ];
+    balls.push(...newBalls); // Thêm 2 quả bóng mới vào mảng
+}
 
-    returnGame.addEventListener("click", function(){
-        canvas.style.display = "none";
-        startGame.style.display = "block";
-        returnGame.style.display = "none";
-        menu.style.display = "block";
-        gameStatus = "menu";
-        resetGame();
-    });
+window.onload = function() {
+    board = document.getElementById("board");
+    board.height = boardHeight;
+    board.width = boardWidth;
+    context = board.getContext("2d"); //used for drawing on the board
 
-
-    level = document.getElementById("board-one");
-    level.height = boardheight;
-    level.width = boardwidth;
-    context = level.getContext("2d");
-
-    //draw initial play
-    context.fillStyle = "skyblue";
+    //draw initial player
+    context.fillStyle="skyblue";
     context.fillRect(player.x, player.y, player.width, player.height);
-    
+
     requestAnimationFrame(update);
     document.addEventListener("keydown", movePlayer);
 
-    // khởi tạo các khối
+    //create blocks
     createBlocks();
 
-    // khởi tạo nút đóng
-    const closeButton = document.createElement("button");
-    // định dạng nút đóng 
-    closeButton.innerText = "X";
-    closeButton.style.position = "absolute";
-    closeButton.style.top = "10px";
-    closeButton.style.right = "10px";
-    closeButton.style.padding = "10px 20px";
-    closeButton.style.fontSize = "16px";
-    closeButton.style.backgroundColor = "darkred";
-    closeButton.style.color = "white";
-    closeButton.style.border = "none";
-    closeButton.style.borderRadius = "5px";
-    closeButton.style.display = "none";
-    // chức năng hover cho nút đóng
-    //--- mouseout: khi rời chuột "khỏi" nút đóng
-    closeButton.addEventListener("mouseout", function() {
-        closeButton.style.backgroundColor = "darkred";
-    });
-    //--- mouseover: khi di chuyển chuột "vào" nút đóng
-    closeButton.addEventListener("mouseover", function() {
-        closeButton.style.backgroundColor = "red";
-    });
-    //xử lý sự kiện click vào nút đóng
-    closeButton.addEventListener("click", function() {
-        // delete the game
-        level.remove();
-        closeButton.remove();
-    });
-    document.body.appendChild(closeButton);
+    // tạo chức năng khi click vào button
+    const startGame = document.getElementById("startGame");
+    const menu = document.getElementById("menu");
+    const game = document.getElementById("board");
+    const level = document.getElementById("level");
 
-    //chức năng bắt đầu game
-    const startButton = document.getElementById(".start-button");
-    startButton.addEventListener("click", function() {
-        startButton.remove();
-        gameStatus = "playing";
+    startGame.addEventListener("click", function() {
         menu.style.display = "none";
+        level.style.display = "block";
+        game.style.display = "block";
+        update();
     });
-    document.body.appendChild(startButton);
+    const level1 = document.getElementById("level1");
+    const level2 = document.getElementById("level2");
+    const level3 = document.getElementById("level3");
+    level1.addEventListener("click", function() {
+        changeLevel(1);
+    });
+    
+    level2.addEventListener("click", function() {
+        changeLevel(2);
+    });
+    
+    level3.addEventListener("click", function() {
+        changeLevel(3);
+    });
 }
 
 
-//trong game
-function update(){
-    if(gameStatus == "playing"){
-    
-        requestAnimationFrame(update); 
-        
-        if(gameOver){
-             return;
-        }
-    
-        context.clearRect(0,0,level.width,level.height);
-    
-    
-        context.fillStyle="skyblue";
-        context.fillRect(player.x, player.y, player.width, player.height);
-    
-        context.fillStyle="white";
-        ball.x += ball.velocityX;
-        ball.y += ball.velocityY;
-        context.fillRect(ball.x, ball.y, ball.width, ball.height);
-    
-    
-        // bóng nảy bật khi va chạm tường
-        if(ball.y <= 0 ){
-            // nếu quả bóng va chạm vào phía trên canvas
-            // thì * -1 để đảo ngược lại hướng bóng bay
-            ball.velocityY *=-1;
-        }
-        //      đường viền bên trái    đường viền bên phải
-        else if ( ball.x <=0 || (ball.x + ball.width) >= boardwidth){
-           // thì * -1 để đảo ngược lại hướng bóng bay
-            ball.velocityX *= -1;
-        }
-        //nếu quả bóng chạm đáy
-        else if((ball.y + ball.height) >= boardheight){
-            //trò chơi kết thúc
-            context.font = "20px sans -serif";
-            context.fillText("Game Over: Press 'SPACE' to restart", 100,400);
-            gameOver = true;
-    
-        } 
-        // va chạm bóng
-        if(topCollision(ball,player) || bottomCollision(ball, player)){
-            ball.velocityY *= -1;
-        }
-        else if(leftCollision(ball,player) || rightCollision(ball,player)){
-            ball.velocityX *= -1;
-        }
-    
-    
-        // vẽ khối
-        context.fillStyle = "skyblue";
-        for (let index = 0; index < blockArray.length; index++) {
-            let block = blockArray[index];
-            if(!block.break){
-                //kiểm tra sự va chạm quả bóng với khôi.
-                // Nếu bóng chạm thì sẽ phá vỡ khối.
-                if(topCollision(ball, block) || bottomCollision(ball, block)){
-                    block.break = true;
-                    ball.velocityY *=-1;
-                    blockCount -=1;
-                    score +=100;
-                }
-                else if (leftCollision(ball, block) || rightCollision(ball,block)){
-                    block.break= true;
-                    ballVelocityX *=-1;
-                    blockCount -=1;
-                    score +=100;
-                }
-                context.fillRect(block.x, block.y, block.width,block.height);
+function changeLevel(level) {
+    currentLevel = level;
+    resetGame();
+}
+
+function update() {
+    requestAnimationFrame(update);
+    //stop drawing
+    if (gameOver) {
+        return;
+    }
+    context.clearRect(0, 0, board.width, board.height);
+
+    // player
+    context.fillStyle = "lightgreen";
+    context.fillRect(player.x, player.y, player.width, player.height);
+
+    // ball
+    if (currentLevel === 2) {
+        context.fillStyle = "red";
+    } else {
+        context.fillStyle = "white";
+    }
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+    context.fillRect(ball.x, ball.y, ball.width, ball.height);
+
+    //bounce the ball off player paddle
+    if (topCollision(ball, player) || bottomCollision(ball, player)) {
+        ball.velocityY *= -1;   // flip y direction up or down
+    }
+    else if (leftCollision(ball, player) || rightCollision(ball, player)) {
+        ball.velocityX *= -1;   // flip x direction left or right
+    }
+
+    if (ball.y <= 0) { 
+        // if ball touches top of canvas
+        ball.velocityY *= -1; //reverse direction
+    }
+    else if (ball.x <= 0 || (ball.x + ball.width >= boardWidth)) {
+        // if ball touches left or right of canvas
+        ball.velocityX *= -1; //reverse direction
+    }
+    else if (ball.y + ball.height >= boardHeight) {
+        // if ball touches bottom of canvas
+        context.font = "20px sans-serif";
+        context.fillText("Game Over: Press 'Space' to Restart", 80, 400);
+        gameOver = true;
+    }
+
+    //blocks
+    // xử lý va chạm giữa ball và block
+    context.fillStyle = "skyblue";
+    for (let i = 0; i < blockArray.length; i++) {
+        let block = blockArray[i];
+        if (!block.break) {   
+            if (topCollision(ball, block) || bottomCollision(ball, block)) {
+                block.break = true;     // block is broken
+                ball.velocityY *= -1;   // flip y direction up or down
+                score += 100;
+                blockCount -= 1;
+                // Tạo vật phẩm khi block bị phá vỡ
+                if (Math.random() < 0.6) {
+                    createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "douubleBall");
+                }                
             }
+            else if (leftCollision(ball, block) || rightCollision(ball, block)) {
+                block.break = true;     // block is broken
+                ball.velocityX *= -1;   // flip x direction left or right
+                score += 100;
+                blockCount -= 1;
+                // Tạo vật phẩm khi block bị phá vỡ
+                if (Math.random() < 0.6) {
+                    createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "douubleBall");
+                }            }
+            context.fillRect(block.x, block.y, block.width, block.height);
             
         }
-            // kiểm tra level
-            if(blockCount ==0){
-                score += 100*blockColumns; // điểm thưởng
-                blockRows = Math.min(blockRows +1, blockMaxRows);
-                createBlocks();
-            }
-    
-    
-            // điểm
-            context.font = "20px sans-serif";
-            context.fillText(score,10,25);
     }
+    updatePowerUps()
+    //next level
+    if (blockCount == 0) {
+        score += 100*blockRows*blockColumns; //bonus points :)
+        blockRows = Math.min(blockRows + 1, blockMaxRows);
+        changeLevel(currentLevel + 1);
+    }
+
+    //score
+    context.font = "20px sans-serif";
+    context.fillText(score, 10, 25);
 }
 
-
-// giới hạn chiều rộng
-function outOfBonus(xPosition){
-    return (xPosition < 0 || xPosition + playerWidth > boardwidth);
+function outOfBounds(xPosition) {
+    return (xPosition < 0 || xPosition + playerWidth > boardWidth);
 }
 
-
-// di chuyen thanh ngang sang trai - phai
-function movePlayer(e){
-    if(gameOver){
-        if(e.code == 'Space'){
+function movePlayer(e) {
+    if (gameOver) {
+        if (e.code == "Space") {
             resetGame();
+            console.log("RESET");
         }
+        return;
     }
-
-    if(e.code == "ArrowLeft"){
+    if (e.code == "ArrowLeft") {
         // player.x -= player.velocityX;
-        let nextPlayerX = player.x - player.velocityX;
-        if(!outOfBonus(nextPlayerX)){
-            player.x = nextPlayerX;
-        }
-
-    }else if(e.code == "ArrowRight"){
-        // player.x += player.velocityX;
-        let nextPlayerX = player.x + player.velocityX;
-        if(!outOfBonus(nextPlayerX)){
-            player.x = nextPlayerX;
+        let nextplayerX = player.x - player.velocityX;
+        if (!outOfBounds(nextplayerX)) {
+            player.x = nextplayerX;
         }
     }
-}
-// phát hiện sự va chạm
-function detectCollision(a,b){
-    return a.x < b.x + b.width && // góc bên trái của a không chạm vào góc bên phải của b
-            a.x + a.width > b.x &&// góc trên cùng bên phải của a
-            a.y < b.y + b.height &&
-            a.y + a.height > b.y;
-}
-function topCollision (ball, block){
-    return detectCollision(ball, block) && (ball.y + ball.height) >= block.y;   
-}
-function bottomCollision (ball, block){
-    return detectCollision(ball, block) && (block.y + block.height) >= ball.y
-}
-function leftCollision(ball,block){
-    return detectCollision(ball,block) && (ball.x + ball.width) >= block.x;
-}
-function rightCollision( ball, block){
-    return detectCollision(ball, block) && (block.x + block.width) >= block.x;
-}
-function createBlocks(){
-    blockArray = [];// tạo các block
-    for (let index = 0; index < blockColumns; index++) {
-       for(let r = 0; r < blockRows; r++){
-        let block = {
-            x : blockX + index*blockWidth + index*10,
-            y : blockY + r*blockHeigt + r*10,
-            width : blockWidth,
-            height : blockHeigt,
-            break : false
+    else if (e.code == "ArrowRight") {
+        let nextplayerX = player.x + player.velocityX;
+        if (!outOfBounds(nextplayerX)) {
+            player.x = nextplayerX;
         }
-        blockArray.push(block);
-       }
-        
+        // player.x += player.velocityX;    
+    }
+}
+
+function detectCollision(a, b) {
+    return a.x < b.x + b.width &&   //a's top left corner doesn't reach b's top right corner
+           a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
+           a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
+           a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
+}
+
+function topCollision(ball, block) { //a is above b (ball is above block)
+    return detectCollision(ball, block) && (ball.y + ball.height) >= block.y;
+}
+
+function bottomCollision(ball, block) { //a is above b (ball is below block)
+    return detectCollision(ball, block) && (block.y + block.height) >= ball.y;
+}
+
+function leftCollision(ball, block) { //a is left of b (ball is left of block)
+    return detectCollision(ball, block) && (ball.x + ball.width) >= block.x;
+}
+
+function rightCollision(ball, block) { //a is right of b (ball is right of block)
+    return detectCollision(ball, block) && (block.x + block.width) >= ball.x;
+}
+
+function createBlocks() {
+    blockArray = []; //clear blockArray
+    for (let c = 0; c < blockColumns; c++) {
+        for (let r = 0; r < blockRows; r++) {
+            let block = {
+                x : blockX + c*blockWidth + c*10, //c*10 space 10 pixels apart columns
+                y : blockY + r*blockHeight + r*10, //r*10 space 10 pixels apart rows
+                width : blockWidth,
+                height : blockHeight,
+                break : false,
+            }
+            blockArray.push(block);
+        }
     }
     blockCount = blockArray.length;
 }
-function resetGame(){
+
+function resetGame() {
     gameOver = false;
     player = {
-        //toa do x
-        x : boardwidth/2 - playerWidth/2,
-        //toa do y
-        y :boardheight - playrerHeight -5,
-        // cau hinh chieu dai va rong
-        width : playerWidth,
-        height : playrerHeight,
-        //van toc di chuyen
+        x : boardWidth/2 - playerWidth/2,
+        y : boardHeight - playerHeight - 5,
+        width: playerWidth,
+        height: playerHeight,
         velocityX : playerVelocityX
     }
-    ball ={
-        x : boardwidth/2,
-        y: boardheight/2,
-        width : ballwidth,
-        height: ballheight,
+    ball = {
+        x : boardWidth/2,
+        y : boardHeight/2,
+        width: ballWidth,
+        height: ballHeight,
         velocityX : ballVelocityX,
         velocityY : ballVelocityY
     }
     blockArray = [];
-    blockRows=3;
-    score =0;
+    blockRows = 3;
+    score = 0;
     createBlocks();
 }
