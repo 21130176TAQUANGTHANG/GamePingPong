@@ -56,27 +56,24 @@ let powerUpHeight = 20;
 let powerUpVelocityY = 1; // Tốc độ rơi của vật phẩm
 
 let powerUps = []; // Mảng chứa các vật phẩm
+// kiểm tra va chạm vật phẩm với nguòi chơi
+let doubleBallActivated = false;
 
-// Hàm tạo mới vật phẩm
-function createPowerUp(x, y) {
-    if(currentLevel === 2) {
-    let powerUp = {
-        x: x,
-        y: y,
-        width: powerUpWidth,
-        height: powerUpHeight,
-        velocityY: powerUpVelocityY,
-        type: "speedUp"
-    };
+function createPowerUp(x, y, type) {
+    if (currentLevel === 2) {
+        let powerUp = {
+            x: x,
+            y: y,
+            width: powerUpWidth,
+            height: powerUpHeight,
+            velocityY: powerUpVelocityY,
+            type: type
+        };
 
-    let doubleBall = {
-        x: x,
-        y: y,
-        width: powerUpWidth,
-        height: powerUpHeight,
-        velocityY: powerUpVelocityY,
-        type: "doubleBall"
-    };
+        if (type === "doubleBall") {
+            doubleBallActivated = true;// cập nhậpt lại đã va chạm với người chơi
+            splitBall(); // Thực hiện tách ra thành 2 quả bóng
+        }
 
         powerUps.push(powerUp);
     }
@@ -89,21 +86,19 @@ function updatePowerUps() {
         
         // Kiểm tra va chạm với người chơi
         if (currentLevel === 2 && detectCollision(player, powerUp)) {
-            if (powerUp.type === "splitBall") {
+            if (powerUp.type === "doubleBall") {
                 splitBall(); // Thực hiện tách ra thành 2 quả bóng
+                powerUps.splice(i, 1); // Xóa vật phẩm khỏi mảng
             }
-            // Thực hiện tăng số lượng quả bóng và tăng tốc độ
-            ball.velocityX = Math.abs(ball.velocityX) * 2; // Tăng tốc độ theo hướng hiện tại của quả bóng
-            ball.velocityY = Math.abs(ball.velocityY) * 2; // Tăng tốc độ theo hướng hiện tại của quả bóng
-            powerUps.splice(i, 1); // Xóa vật phẩm khỏi mảng
         } else {
             // Vẽ vật phẩm
-            context.fillStyle = "yellow";
+            context.fillStyle = "white";
             context.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
         }
     }
 }
 // tách ra thành 2 quả bóng
+let balls =[];
 function splitBall() {
     let newBalls = [
         { x: ball.x, y: ball.y, width: ball.width, height: ball.height, velocityX: -ball.velocityX, velocityY: -ball.velocityY },
@@ -112,11 +107,12 @@ function splitBall() {
     balls.push(...newBalls); // Thêm 2 quả bóng mới vào mảng
 }
 
+
 window.onload = function() {
     board = document.getElementById("board");
     board.height = boardHeight;
     board.width = boardWidth;
-    context = board.getContext("2d"); //used for drawing on the board
+    context = board.getContext("2d"); // ve 2d
 
     //draw initial player
     context.fillStyle="skyblue";
@@ -125,7 +121,7 @@ window.onload = function() {
     requestAnimationFrame(update);
     document.addEventListener("keydown", movePlayer);
 
-    //create blocks
+    // vẽ khối
     createBlocks();
 
     // tạo chức năng khi click vào button
@@ -180,6 +176,12 @@ function update() {
     } else {
         context.fillStyle = "white";
     }
+    balls.forEach(function(ball) {
+        ball.x += ball.velocityX;
+        ball.y += ball.velocityY;
+        context.fillRect(ball.x, ball.y, ball.width, ball.height);
+    });
+
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
     context.fillRect(ball.x, ball.y, ball.width, ball.height);
@@ -219,9 +221,14 @@ function update() {
                 score += 100;
                 blockCount -= 1;
                 // Tạo vật phẩm khi block bị phá vỡ
-                if (Math.random() < 0.6) {
-                    createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "douubleBall");
-                }                
+                // Tạo vật phẩm khi block bị phá vỡ
+                if ( currentLevel ===2 && doubleBallActivatedBlocks.includes(block)) {
+                    if (Math.random() < 0.6) {
+                        createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");   
+                        splitBall();
+                    }
+                }
+                        
             }
             else if (leftCollision(ball, block) || rightCollision(ball, block)) {
                 block.break = true;     // block is broken
@@ -229,9 +236,14 @@ function update() {
                 score += 100;
                 blockCount -= 1;
                 // Tạo vật phẩm khi block bị phá vỡ
-                if (Math.random() < 0.6) {
-                    createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "douubleBall");
-                }            }
+                if ( currentLevel ===2 && doubleBallActivatedBlocks.includes(block)) {
+                    if (Math.random() < 0.6) {
+                        createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");
+                        splitBall();
+                    }
+                }       
+             }
+
             context.fillRect(block.x, block.y, block.width, block.height);
             
         }
