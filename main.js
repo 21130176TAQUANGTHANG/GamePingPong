@@ -22,8 +22,8 @@ let player = {
 //ball
 let ballWidth = 10;
 let ballHeight = 10;
-let ballVelocityX = 15; //15 for testing, 3 normal
-let ballVelocityY = 10; //10 for testing, 2 normal
+let ballVelocityX = 2; //15 for testing, 3 normal
+let ballVelocityY = 1; //10 for testing, 2 normal
 
 let ball = {
     x : boardWidth/2,
@@ -56,8 +56,10 @@ let powerUpHeight = 20;
 let powerUpVelocityY = 1; // Tốc độ rơi của vật phẩm
 
 let powerUps = []; // Mảng chứa các vật phẩm
+
 // kiểm tra va chạm vật phẩm với nguòi chơi
-let doubleBallActivated = false;
+let playerHitPowerUp = false;
+
 
 function createPowerUp(x, y, type) {
     if (currentLevel === 2) {
@@ -71,8 +73,7 @@ function createPowerUp(x, y, type) {
         };
 
         if (type === "doubleBall") {
-            doubleBallActivated = true;// cập nhậpt lại đã va chạm với người chơi
-            splitBall(); // Thực hiện tách ra thành 2 quả bóng
+            playerHitPowerUp = true;
         }
 
         powerUps.push(powerUp);
@@ -81,14 +82,17 @@ function createPowerUp(x, y, type) {
 // Hàm cập nhật vật phẩm
 function updatePowerUps() {
     for (let i = 0; i < powerUps.length; i++) {
+        // làm vật phẩm rơi xuống dưới
         let powerUp = powerUps[i];
         powerUp.y += powerUp.velocityY;
         
         // Kiểm tra va chạm với người chơi
         if (currentLevel === 2 && detectCollision(player, powerUp)) {
             if (powerUp.type === "doubleBall") {
-                splitBall(); // Thực hiện tách ra thành 2 quả bóng
                 powerUps.splice(i, 1); // Xóa vật phẩm khỏi mảng
+                splitBall(); // Thực hiện tách ra thành 2 quả bóng
+                playerHitPowerUp = true;
+
             }
         } else {
             // Vẽ vật phẩm
@@ -156,6 +160,10 @@ window.onload = function() {
 function changeLevel(level) {
     currentLevel = level;
     resetGame();
+    if (currentLevel === 2) {
+        // Clear balls array when moving to the next level
+        balls = [];
+    }
 }
 
 function update() {
@@ -166,25 +174,36 @@ function update() {
     }
     context.clearRect(0, 0, board.width, board.height);
 
-    // player
+    // Người chơi
     context.fillStyle = "lightgreen";
     context.fillRect(player.x, player.y, player.width, player.height);
 
-    // ball
+    // định dạng quả bóng ở level 2
     if (currentLevel === 2) {
         context.fillStyle = "red";
     } else {
         context.fillStyle = "white";
     }
-    balls.forEach(function(ball) {
-        ball.x += ball.velocityX;
-        ball.y += ball.velocityY;
-        context.fillRect(ball.x, ball.y, ball.width, ball.height);
-    });
-
+    // quả bóng gốc
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
     context.fillRect(ball.x, ball.y, ball.width, ball.height);
+
+
+
+    // quả bóng phụ khi ăn vật phẩm
+    balls.forEach(function(ball) {
+        ball.x += ball.velocityX;
+        ball.y += ball.velocityY;
+        // kiểm tra va chạm quả bóng phụ với tường
+        if (ball.x <= 0 || ball.x + ball.width >= boardWidth) {
+            ball.velocityX *= -1;
+        }
+        if (ball.y <= 0 || ball.y + ball.height >= boardHeight) {
+            ball.velocityY *= -1;
+        }
+        context.fillRect(ball.x, ball.y, ball.width, ball.height);
+    });
 
     //bounce the ball off player paddle
     if (topCollision(ball, player) || bottomCollision(ball, player)) {
@@ -216,38 +235,41 @@ function update() {
         let block = blockArray[i];
         if (!block.break) {   
             if (topCollision(ball, block) || bottomCollision(ball, block)) {
-                block.break = true;     // block is broken
-                ball.velocityY *= -1;   // flip y direction up or down
+                block.break = true;     // phá vỡ block
+                ball.velocityY *= -1;   // đảo ngược tạo độ quá bóng va chạm với block
                 score += 100;
                 blockCount -= 1;
-                // Tạo vật phẩm khi block bị phá vỡ
-                // Tạo vật phẩm khi block bị phá vỡ
-                if ( currentLevel ===2 && doubleBallActivatedBlocks.includes(block)) {
-                    if (Math.random() < 0.6) {
-                        createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");   
-                        splitBall();
-                    }
-                }
-                        
+                createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");
+                
             }
-            else if (leftCollision(ball, block) || rightCollision(ball, block)) {
+            else if (leftCollision(ball, block) || rightCollision(ball, block)){
                 block.break = true;     // block is broken
                 ball.velocityX *= -1;   // flip x direction left or right
                 score += 100;
                 blockCount -= 1;
-                // Tạo vật phẩm khi block bị phá vỡ
-                if ( currentLevel ===2 && doubleBallActivatedBlocks.includes(block)) {
-                    if (Math.random() < 0.6) {
-                        createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");
-                        splitBall();
-                    }
-                }       
-             }
+                createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");   
+             
+            }
 
             context.fillRect(block.x, block.y, block.width, block.height);
             
         }
-    }
+    } 
+
+    balls.forEach(function(ball) {
+        //check collision between new ball and blocks
+        for (let i = 0; i < blockArray.length; i++) {
+            let block = blockArray[i];
+            if (!block.break && detectCollision(ball, block)) {
+                block.break = true;     // break block
+                ball.velocityY *= -1;   // reverse ball's y velocity
+                score += 100;
+                blockCount -= 1;
+                createPowerUp(block.x + block.width / 2, block.y + block.height / 2, "doubleBall");
+            }
+        }
+    });
+
     updatePowerUps()
     //next level
     if (blockCount == 0) {
@@ -289,11 +311,12 @@ function movePlayer(e) {
     }
 }
 
+// Kiểm tra va chạm giữa 2 đối tượng bất kỳ
 function detectCollision(a, b) {
-    return a.x < b.x + b.width &&   //a's top left corner doesn't reach b's top right corner
-           a.x + a.width > b.x &&   //a's top right corner passes b's top left corner
-           a.y < b.y + b.height &&  //a's top left corner doesn't reach b's bottom left corner
-           a.y + a.height > b.y;    //a's bottom left corner passes b's top left corner
+    return a.x < b.x + b.width &&    // Kiểm tra xem góc trên bên trái của a có vượt qua góc trên bên phải của b không
+           a.x + a.width > b.x &&    // Kiểm tra xem góc trên bên phải của a có vượt qua góc trên bên trái của b không
+           a.y < b.y + b.height &&   // Kiểm tra xem góc trên bên trái của a có vượt qua góc dưới bên trái của b không
+           a.y + a.height > b.y;     // Kiểm tra xem góc dưới bên trái của a có vượt qua góc trên bên trái của b không
 }
 
 function topCollision(ball, block) { //a is above b (ball is above block)
