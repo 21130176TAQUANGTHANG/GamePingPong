@@ -1,8 +1,19 @@
+$white: #fff;
+$BlueViolet :#8A2BE2;
+$black: #191919;
+$skyblue: #87CEEB;
 body {
-    background-color: black;
+    background-color: $black;
+    
+}
+*{
+  font-family: "Pixelify Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
 }
 #board {
-    border: 1px solid skyblue;
+    border: 1px solid $skyblue;
     margin: 0 auto;
     display: block;
     justify-content: center;
@@ -10,30 +21,118 @@ body {
 }
 
 #menu {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #fff;
-    padding: 20px;
+    background-color: $black;
     border-radius: 10px;
-    z-index: 10;
-  }
-  
-  .menu h1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
-    margin-top: 0;
+    align-items: center;
+    position: relative;
+    margin: 0;
+}
+#menu {
+  .title{
+    color: $BlueViolet;
+    font-size: 3rem;
+    padding: 0;
+    margin: 0;
   }
+  .menugame{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    button{
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      &:hover{
+        background-color: $BlueViolet;
+        color: $white;
+      }
+    }
   
-  .menu button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
   }
-  
-  .menu button:hover {
-    background-color: #ccc;
+}
+#level{
+  justify-content: center;
+  align-items: center;
+  .canvasBoard {
+    margin: 10px 20px;
+    #returnGame{
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      &:hover{
+        background-color: $BlueViolet;
+        color: $white;
+      }
+    }
+    #pause{
+      position: absolute;
+      top:80px;
+      right: 10px;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      &:hover{
+        background-color: $BlueViolet;
+        color: $white;
+      }
+    
+    }
   }
- 
+  .buttonLevel{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 500px;
+    padding: 10px;
+    border: 1px solid $skyblue;
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      &:hover{
+        background-color: $BlueViolet;
+        color: $white;
+      }
+    }
+    #score{
+      color: $BlueViolet;
+      font-size: 2rem;
+      font-weight: 100;
+    }
+  }
+}
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 2px solid black;
+  z-index: 9999;
+}

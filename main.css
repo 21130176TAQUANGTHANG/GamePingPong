@@ -1,9 +1,16 @@
 body {
-  background-color: black;
+  background-color: #191919;
+}
+
+* {
+  font-family: "Pixelify Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
 }
 
 #board {
-  border: 1px solid skyblue;
+  border: 1px solid #87CEEB;
   margin: 0 auto;
   display: block;
   justify-content: center;
@@ -11,29 +18,117 @@ body {
 }
 
 #menu {
+  background-color: #191919;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  position: relative;
+  margin: 0;
+}
+
+#menu .title {
+  color: #8A2BE2;
+  font-size: 3rem;
+  padding: 0;
+  margin: 0;
+}
+#menu .menugame {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+#menu .menugame button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+#menu .menugame button:hover {
+  background-color: #8A2BE2;
+  color: #fff;
+}
+
+#level {
+  justify-content: center;
+  align-items: center;
+}
+#level .canvasBoard {
+  margin: 10px 20px;
+}
+#level .canvasBoard #returnGame {
   position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+#level .canvasBoard #returnGame:hover {
+  background-color: #8A2BE2;
+  color: #fff;
+}
+#level .canvasBoard #pause {
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+#level .canvasBoard #pause:hover {
+  background-color: #8A2BE2;
+  color: #fff;
+}
+#level .buttonLevel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 500px;
+  padding: 10px;
+  border: 1px solid #87CEEB;
+}
+#level .buttonLevel button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+#level .buttonLevel button:hover {
+  background-color: #8A2BE2;
+  color: #fff;
+}
+#level .buttonLevel #score {
+  color: #8A2BE2;
+  font-size: 2rem;
+  font-weight: 100;
+}
+
+.popup {
+  display: none;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
+  background-color: white;
   padding: 20px;
-  border-radius: 10px;
-  z-index: 10;
-}
-
-.menu h1 {
-  text-align: center;
-  margin-top: 0;
-}
-
-.menu button {
-  margin: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.menu button:hover {
-  background-color: #ccc;
+  border: 2px solid black;
+  z-index: 9999;
 }/*# sourceMappingURL=main.css.map */

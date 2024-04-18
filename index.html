@@ -4,28 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
     <script src="main.js"></script>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
     <div id="menu">
-        <button id="startGame">Start Game</button>
-        <button id="setting">Setting</button>
-        <button id="videoDemo">Video Demo</button>
+        <div class="title">
+            <h1>PING PONG</h1>
+        </div>
+
+        <div class="menugame">
+            <button id="startGame">Start Game</button>
+            <button id="setting">About me</button>
+            <button id="videoDemo">Video Demo</button>
+        </div>
     </div>
 
 
-    <canvas id="board" style="display: none;"></canvas>
     
-    <button id="returnGame" style="display: none;">Return to Menu</button>
 
     <div id="level" style="display: none;">
-        <button id="level1">Level 1</button>
-        <button id="level2">Level 2</button>
-        <button id="level3">Level 3</button>
-        <button id="level-four">Level 4</button>
-        <button id="level-five">Level 5</button>
-        <button id="level-six">Level 6</button>
+
+        <div class="canvasBoard">
+            <canvas id="board" style="display: none;"></canvas>    
+            <button id="returnGame">Menu</button>
+            <button id="pause">Pause</button>
+        </div>
+
+        <div class="buttonLevel">
+
+            <div id="score"></div>
+
+
+            <button id="level1">Level 1</button>
+            <button id="level2">Level 2</button>
+            <button id="level3">Level 3</button>
+            <button id="level-four">Level 4</button>
+            <button id="level-five">Level 5</button>
+            <button id="level-six">Level 6</button>
+        </div>
+    </div>
+
+    <div class="popup" id="aboutMePopup">
+        <h2>About Me</h2>
+        <p>Introduction text here...</p>
+        <img src="path_to_your_image.jpg" alt="Your Image">
+        <button id="closeButton">Close</button>
     </div>
 </body>
 </html>

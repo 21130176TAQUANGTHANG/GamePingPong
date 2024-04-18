@@ -60,6 +60,9 @@ let powerUps = []; // Mảng chứa các vật phẩm
 // kiểm tra va chạm vật phẩm với nguòi chơi
 let playerHitPowerUp = false;
 
+//lệnh pause
+let isPaused = false;
+
 
 function createPowerUp(x, y, type) {
     if (currentLevel === 2) {
@@ -136,13 +139,14 @@ window.onload = function() {
 
     startGame.addEventListener("click", function() {
         menu.style.display = "none";
-        level.style.display = "block";
-        game.style.display = "block";
+        level.style.display = "flex";
+        game.style.display = "flex";
         update();
     });
     const level1 = document.getElementById("level1");
     const level2 = document.getElementById("level2");
     const level3 = document.getElementById("level3");
+    const pause = document.getElementById("pause");
     level1.addEventListener("click", function() {
         changeLevel(1);
     });
@@ -154,6 +158,47 @@ window.onload = function() {
     level3.addEventListener("click", function() {
         changeLevel(3);
     });
+    pause.addEventListener("click", function() {
+        if (!gameOver) {
+            if (!isPaused) {
+                // Nếu trò chơi không được tạm dừng, tạm dừng trò chơi
+                cancelAnimationFrame(update);
+                isPaused = true;
+                pauseButton.textContent = "Resume";
+            } else {
+                // Nếu trò chơi đã tạm dừng, tiếp tục trò chơi
+                requestAnimationFrame(update);
+                isPaused = false;
+                pauseButton.textContent = "Pause";
+            }
+        }
+    });
+    const returnButton = document.getElementById("returnGame");
+
+    // Quay về menu
+    returnButton.addEventListener("click", function() {
+        // Chuyển hướng canvas về trang "index.html"
+        window.location.href = "index.html";
+    });
+
+
+    // Lấy tham chiếu đến nút setting và popup từ HTML
+    const settingButton = document.getElementById("setting");
+    const popup = document.querySelector(".popup");
+
+    // Gắn sự kiện click cho nút setting
+    settingButton.addEventListener("click", function() {
+        // Hiển thị popup
+        popup.style.display = "block";
+    });
+
+    // Gắn sự kiện click cho nút close trong popup
+    const closeButton = document.getElementById("closeButton");
+    closeButton.addEventListener("click", function() {
+        // Ẩn popup khi click vào nút close
+        popup.style.display = "none";
+    });
+
 }
 
 
@@ -169,7 +214,7 @@ function changeLevel(level) {
 function update() {
     requestAnimationFrame(update);
     //stop drawing
-    if (gameOver) {
+    if (gameOver || isPaused) {
         return;
     }
     context.clearRect(0, 0, board.width, board.height);
@@ -278,9 +323,10 @@ function update() {
         changeLevel(currentLevel + 1);
     }
 
-    //score
-    context.font = "20px sans-serif";
-    context.fillText(score, 10, 25);
+    //điểm
+    const scoreElement = document.getElementById("score");
+    scoreElement.textContent = "Score: " + score;
+    
 }
 
 function outOfBounds(xPosition) {
@@ -373,4 +419,5 @@ function resetGame() {
     blockRows = 3;
     score = 0;
     createBlocks();
+    balls = [];
 }
