@@ -115,6 +115,12 @@ body {
   background-color: #8A2BE2;
   color: #fff;
 }
+#level .buttonLevel button.active {
+  background-color: #8A2BE2;
+  color: white;
+  font-weight: bold;
+  border: 1px solid lightblue;
+}
 #level .buttonLevel #score {
   color: #8A2BE2;
   font-size: 2rem;
